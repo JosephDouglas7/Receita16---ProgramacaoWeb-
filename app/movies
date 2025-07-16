@@ -1,0 +1,45 @@
+export default async function Home({ searchParams = {} }) { 
+    const titleSearchKey = searchParams.titleSearchKey || 'bagdad';
+    const year = searchParams.year || '';
+    const type = searchParams.type || 'movie';
+    const plot = searchParams.plot || 'short';
+
+    try {
+        const res = await fetch(`http://www.omdbapi.com/?apikey=673b4227&s=${titleSearchKey}&y=${year}&type=${type}&plot=${plot}`);
+        
+        if (!res.ok) {
+            throw new Error(`Erro na API: ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        return (
+            <div>            
+                {data.Search && data.Search.length > 0 ? (
+                    data.Search.map((m) => (
+                        <div key={m.imdbID} style={{ marginBottom: "20px" }}>
+                            <h2>{m.Title} ({m.Year})</h2>
+                            
+                            {/* Verifica se o pôster é válido antes de exibir */}
+                            {m.Poster !== "N/A" ? (
+                                <img 
+                                    src={m.Poster} 
+                                    alt={`Pôster de ${m.Title}`} 
+                                    style={{ width: "200px", height: "auto" }} 
+                                />
+                            ) : (
+                                <p>🔹 Pôster não disponível</p>
+                            )}
+                        </div>
+                    ))
+                ) : (
+                    <p>Nenhum resultado encontrado.</p>
+                )}
+            </div>
+        );
+
+    } catch (error) {
+        console.error("Erro ao buscar dados:", error);
+        return <p>Erro ao carregar os dados. Tente novamente mais tarde.</p>;
+    }
+}
